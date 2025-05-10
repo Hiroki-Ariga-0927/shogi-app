@@ -1,10 +1,11 @@
+import os
 from flask import Flask, render_template, request, redirect
 import datetime
 
 app = Flask(__name__)
 
 members = ["三森", "遠藤", "有賀", "佐藤", "粕谷","星野","吉川","秦左"]  # 選択肢に出すメンバー
-participants = {}  
+participants = {}
 
 def get_upcoming_activity_dates():
     today = datetime.date.today()
@@ -42,4 +43,5 @@ def index():
     return render_template("index.html", participants=participants, members=members, upcoming_dates=upcoming_dates)
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 5000))  # Renderの環境変数PORTを使ってポート番号を設定
+    app.run(host="0.0.0.0", port=port, debug=True)  # ポート番号を指定してFlaskを起動
