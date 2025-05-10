@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: shogibu-app  # アプリの名前を指定。変更してOK。
-    env: python        # Pythonの環境で動かすことを指定
-    buildCommand: ""   # 今回はビルド作業不要だから空白でOK
-    startCommand: "python app.py"  # Flaskアプリを起動するコマンド
+    name: shogibu-app
+    env: python
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "python app.py"
