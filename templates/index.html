@@ -28,7 +28,9 @@
             <select name="date">
                 <option value="">--選択--</option>
                 {% for date in upcoming_dates %}
-                    <option value="{{ date }}">{{ date.strftime("%Y-%m-%d (%a)") }}</option>
+                    <option value="{{ date }}" {% if date.strftime('%Y-%m-%d') == selected_name %}selected{% endif %}>
+                        {{ date.strftime("%Y-%m-%d (%a)") }}
+                    </option>
                 {% endfor %}
             </select>
         </label>
