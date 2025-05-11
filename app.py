@@ -1,11 +1,11 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect
 import datetime
 import json
 import os
 from collections import OrderedDict
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key_here"  # セッション用（任意の文字列に置き換えてください）
+app.secret_key = "your_secret_key_here"
 
 members = ["三森", "遠藤", "有賀", "佐藤", "粕谷", "星野", "吉川", "秦左", "内山", "峯村"]
 DATA_FILE = "participants.json"
@@ -14,7 +14,21 @@ DATA_FILE = "participants.json"
 def load_participants():
     if os.path.exists(DATA_FILE):
         with open(DATA_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+            data = json.load(f)
+
+        # 今日より過去のデータを削除
+        today = datetime.date.today().isoformat()
+        cleaned_data = {
+            date: names for date, names in data.items()
+            if date >= today
+        }
+
+        # 更新があれば保存
+        if cleaned_data != data:
+            save_participants(cleaned_data)
+
+        return cleaned_data
+
     return {}
 
 def save_participants(data):
@@ -23,7 +37,7 @@ def save_participants(data):
 
 participants = load_participants()
 
-# --- 今後の活動日を取得（月・火・木） ---
+# --- 今後の活動日（月・火・木） ---
 def get_upcoming_activity_dates():
     today = datetime.date.today()
     upcoming = []
@@ -33,7 +47,6 @@ def get_upcoming_activity_dates():
             upcoming.append(day)
     return upcoming
 
-# --- メインページ処理 ---
 @app.route("/", methods=["GET", "POST"])
 def index():
     upcoming_dates = get_upcoming_activity_dates()
@@ -45,7 +58,6 @@ def index():
 
         if not (name and date_str):
             error_message = "名前と日付を選択してください"
-            # 昇順で渡す（POST失敗時も同じように）
             sorted_participants = OrderedDict(
                 sorted(participants.items(), key=lambda item: item[0])
             )
@@ -55,10 +67,7 @@ def index():
                 members=members,
                 upcoming_dates=upcoming_dates,
                 error_message=error_message,
-                selected_name=name
             )
-
-        session["name"] = name  # セッションに名前を保存
 
         if action == "参加":
             if date_str not in participants:
@@ -72,9 +81,6 @@ def index():
         save_participants(participants)
         return redirect("/")
 
-    selected_name = session.get("name", "")
-    
-    # 昇順にしてテンプレートへ渡す
     sorted_participants = OrderedDict(
         sorted(participants.items(), key=lambda item: item[0])
     )
@@ -83,8 +89,7 @@ def index():
         "index.html",
         participants=sorted_participants,
         members=members,
-        upcoming_dates=upcoming_dates,
-        selected_name=selected_name
+        upcoming_dates=upcoming_dates
     )
 
 if __name__ == "__main__":
