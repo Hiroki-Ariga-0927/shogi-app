@@ -2,41 +2,50 @@
 <html lang="ja">
 <head>
     <meta charset="UTF-8">
-    <title>将棋部 出席アプリ</title>
+    <title>活動参加管理</title>
 </head>
 <body>
-    <h1>参加表明</h1>
+    <h1>活動参加フォーム</h1>
+
     {% if error_message %}
-    <p style="color: red;">{{ error_message }}</p>
+        <p style="color: red;">{{ error_message }}</p>
     {% endif %}
 
     <form method="POST">
-        <select name="name">
-            <option value="">名前を選択</option>
-            {% for member in members %}
-                <option value="{{ member }}">{{ member }}</option>
-            {% endfor %}
-        </select>
+        <label>名前:
+            <select name="name">
+                <option value="">--選択--</option>
+                {% for member in members %}
+                    <option value="{{ member }}" {% if member == selected_name %}selected{% endif %}>
+                        {{ member }}
+                    </option>
+                {% endfor %}
+            </select>
+        </label>
+        <br><br>
 
-        <select name="date">
-            <option value="">日付を選択</option>
-            {% for date in upcoming_dates %}
-                <option value="{{ date }}">{{ date.strftime("%Y-%m-%d (%a)") }}</option>
-            {% endfor %}
-        </select>
+        <label>日付:
+            <select name="date">
+                <option value="">--選択--</option>
+                {% for date in upcoming_dates %}
+                    <option value="{{ date }}">{{ date.strftime("%Y-%m-%d (%a)") }}</option>
+                {% endfor %}
+            </select>
+        </label>
+        <br><br>
 
-        <button type="submit" name="action" value="参加">参加する！</button>
+        <button type="submit" name="action" value="参加">参加</button>
         <button type="submit" name="action" value="キャンセル">キャンセル</button>
     </form>
 
-    <h2>参加者リスト</h2>
-{% for date, names in participants|dictsort %}
-    <h3>{{ date }} の参加者</h3>
-    <ul>
-        {% for name in names %}
-            <li>{{ name }}</li>
-        {% endfor %}
-    </ul>
-{% endfor %}
+    <h2>参加者一覧</h2>
+    {% for date, names in participants.items() %}
+        <h3>{{ date }}</h3>
+        <ul>
+            {% for name in names %}
+                <li>{{ name }}</li>
+            {% endfor %}
+        </ul>
+    {% endfor %}
 </body>
 </html>
