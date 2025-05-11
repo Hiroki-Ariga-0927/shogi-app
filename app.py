@@ -1,21 +1,38 @@
-import os
-from flask import Flask, render_template, request, redirect
+from flask import Flask, render_template, request, redirect, session
 import datetime
+import json
+import os
 
 app = Flask(__name__)
+app.secret_key = "your_secret_key_here"  # セッションのために必要（適当な文字列に変えてください）
 
-members = ["三森", "遠藤", "有賀", "佐藤", "粕谷","星野","吉川","秦左","内山","峯村"]  # 選択肢に出すメンバー
-participants = {}
+members = ["三森", "遠藤", "有賀", "佐藤", "粕谷", "星野", "吉川", "秦左", "内山", "峯村"]
+DATA_FILE = "participants.json"
 
+# --- データの保存・読み込み ---
+def load_participants():
+    if os.path.exists(DATA_FILE):
+        with open(DATA_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return {}
+
+def save_participants(data):
+    with open(DATA_FILE, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
+
+participants = load_participants()
+
+# --- 今後の活動日を取得（月・火・木） ---
 def get_upcoming_activity_dates():
     today = datetime.date.today()
     upcoming = []
     for i in range(7):
         day = today + datetime.timedelta(days=i)
-        if day.weekday() in [0, 1, 3]:
+        if day.weekday() in [0, 1, 3]:  # 月:0, 火:1, 木:3
             upcoming.append(day)
     return upcoming
 
+# --- メインページ処理 ---
 @app.route("/", methods=["GET", "POST"])
 def index():
     upcoming_dates = get_upcoming_activity_dates()
@@ -27,7 +44,16 @@ def index():
 
         if not (name and date_str):
             error_message = "名前と日付を選択してください"
-            return render_template("index.html", participants=participants, members=members, upcoming_dates=upcoming_dates, error_message=error_message)
+            return render_template(
+                "index.html",
+                participants=participants,
+                members=members,
+                upcoming_dates=upcoming_dates,
+                error_message=error_message,
+                selected_name=name
+            )
+
+        session["name"] = name  # セッションに名前を保存
 
         if action == "参加":
             if date_str not in participants:
@@ -38,10 +64,17 @@ def index():
             if date_str in participants and name in participants[date_str]:
                 participants[date_str].remove(name)
 
+        save_participants(participants)
         return redirect("/")
 
-    return render_template("index.html", participants=participants, members=members, upcoming_dates=upcoming_dates)
+    selected_name = session.get("name", "")
+    return render_template(
+        "index.html",
+        participants=participants,
+        members=members,
+        upcoming_dates=upcoming_dates,
+        selected_name=selected_name
+    )
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))  # Renderの環境変数PORTを使ってポート番号を設定
-    app.run(host="0.0.0.0", port=port, debug=True)  # ポート番号を指定してFlaskを起動
+    app.run(debug=True)
