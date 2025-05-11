@@ -2,9 +2,10 @@ from flask import Flask, render_template, request, redirect, session
 import datetime
 import json
 import os
+from collections import OrderedDict
 
 app = Flask(__name__)
-app.secret_key = "your_secret_key_here"  # セッションのために必要（適当な文字列に変えてください）
+app.secret_key = "your_secret_key_here"  # セッション用（任意の文字列に置き換えてください）
 
 members = ["三森", "遠藤", "有賀", "佐藤", "粕谷", "星野", "吉川", "秦左", "内山", "峯村"]
 DATA_FILE = "participants.json"
@@ -44,13 +45,17 @@ def index():
 
         if not (name and date_str):
             error_message = "名前と日付を選択してください"
+            # 昇順で渡す（POST失敗時も同じように）
+            sorted_participants = OrderedDict(
+                sorted(participants.items(), key=lambda item: item[0])
+            )
             return render_template(
                 "index.html",
-                participants=participants,
+                participants=sorted_participants,
                 members=members,
                 upcoming_dates=upcoming_dates,
                 error_message=error_message,
-                selected_name=name  # セッションに保存する名前
+                selected_name=name
             )
 
         session["name"] = name  # セッションに名前を保存
@@ -68,12 +73,18 @@ def index():
         return redirect("/")
 
     selected_name = session.get("name", "")
+    
+    # 昇順にしてテンプレートへ渡す
+    sorted_participants = OrderedDict(
+        sorted(participants.items(), key=lambda item: item[0])
+    )
+
     return render_template(
         "index.html",
-        participants=participants,
+        participants=sorted_participants,
         members=members,
         upcoming_dates=upcoming_dates,
-        selected_name=selected_name  # セッションから選ばれた名前を渡す
+        selected_name=selected_name
     )
 
 if __name__ == "__main__":
