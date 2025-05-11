@@ -13,7 +13,7 @@
 
     <form method="POST">
         <label>名前:
-            <select name="name">
+            <select name="name" id="name-select">
                 <option value="">--選択--</option>
                 {% for member in members %}
                     <option value="{{ member }}" {% if member == selected_name %}selected{% endif %}>
@@ -28,9 +28,7 @@
             <select name="date">
                 <option value="">--選択--</option>
                 {% for date in upcoming_dates %}
-                    <option value="{{ date }}" {% if date.strftime('%Y-%m-%d') == selected_name %}selected{% endif %}>
-                        {{ date.strftime("%Y-%m-%d (%a)") }}
-                    </option>
+                    <option value="{{ date }}">{{ date.strftime("%Y-%m-%d (%a)") }}</option>
                 {% endfor %}
             </select>
         </label>
@@ -49,5 +47,28 @@
             {% endfor %}
         </ul>
     {% endfor %}
+
+    <!-- 名前の選択をローカルストレージに保存・復元するスクリプト -->
+    <script>
+        const nameSelect = document.querySelector('select[name="name"]');
+
+        // ページ読み込み時に保存された名前を復元
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedName = localStorage.getItem('savedName');
+            if (savedName) {
+                nameSelect.value = savedName;
+            }
+        });
+
+        // 名前が変更されたときに保存
+        nameSelect.addEventListener('change', () => {
+            const selectedName = nameSelect.value;
+            if (selectedName) {
+                localStorage.setItem('savedName', selectedName);
+            } else {
+                localStorage.removeItem('savedName');
+            }
+        });
+    </script>
 </body>
 </html>
