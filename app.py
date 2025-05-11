@@ -50,7 +50,7 @@ def index():
                 members=members,
                 upcoming_dates=upcoming_dates,
                 error_message=error_message,
-                selected_name=name
+                selected_name=name  # セッションに保存する名前
             )
 
         session["name"] = name  # セッションに名前を保存
@@ -73,7 +73,7 @@ def index():
         participants=participants,
         members=members,
         upcoming_dates=upcoming_dates,
-        selected_name=selected_name
+        selected_name=selected_name  # セッションから選ばれた名前を渡す
     )
 
 if __name__ == "__main__":
