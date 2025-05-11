@@ -4,7 +4,7 @@ import datetime
 
 app = Flask(__name__)
 
-members = ["三森", "遠藤", "有賀", "佐藤", "粕谷","星野","吉川","秦左"]  # 選択肢に出すメンバー
+members = ["三森", "遠藤", "有賀", "佐藤", "粕谷","星野","吉川","秦左","内山"]  # 選択肢に出すメンバー
 participants = {}
 
 def get_upcoming_activity_dates():
