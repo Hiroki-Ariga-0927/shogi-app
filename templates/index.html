@@ -46,19 +46,19 @@
         </ul>
     {% endfor %}
 
-    <!-- ローカルストレージにも保存（予備） -->
+    <!-- ローカルストレージ復元 -->
     <script>
         const nameSelect = document.querySelector('select[name="name"]');
 
-        // ページ読み込み時にローカルストレージの名前を復元
         window.addEventListener('DOMContentLoaded', () => {
+            const selected = nameSelect.value;
             const savedName = localStorage.getItem('savedName');
-            if (savedName && !nameSelect.value) {
+
+            if ((!selected || selected === "") && savedName) {
                 nameSelect.value = savedName;
             }
         });
 
-        // 名前が変更されたときに保存
         nameSelect.addEventListener('change', () => {
             const selectedName = nameSelect.value;
             if (selectedName) {
