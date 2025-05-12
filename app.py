@@ -17,7 +17,10 @@ def load_participants():
             data = json.load(f)
 
         today = datetime.date.today().isoformat()
-        cleaned_data = {date: names for date, names in data.items() if date >= today}
+        cleaned_data = {
+            date: names for date, names in data.items()
+            if (date >= today or date.startswith("_"))  # "_last_name" は残す
+        }
 
         if cleaned_data != data:
             save_participants(cleaned_data)
@@ -74,18 +77,29 @@ def index():
             if date_str in participants and name in participants[date_str]:
                 participants[date_str].remove(name)
 
+        # JSONファイルにも名前を保存（キー名 "_last_name"）
+        participants["_last_name"] = name
         save_participants(participants)
+
+        # 名前が入力されていた場合のみクッキーを設定
         resp = make_response(redirect("/"))
-        resp.set_cookie("selected_name", name, max_age=60*60*24*30)  # クッキーに名前保存（30日）
+        if name:
+            resp.set_cookie("selected_name", name, max_age=60*60*24*30)  # 30日
         return resp
 
-    # GET時にクッキーから名前取得
+    # GET時の名前選択：クッキー → JSONファイル
     selected_name = request.cookies.get("selected_name", "")
+    if not selected_name:
+        selected_name = participants.get("_last_name", "")
 
-    sorted_participants = OrderedDict(sorted(participants.items()))
+    # 表示データ整形
+    visible_participants = OrderedDict(
+        (k, v) for k, v in sorted(participants.items()) if not k.startswith("_")
+    )
+
     return render_template(
         "index.html",
-        participants=sorted_participants,
+        participants=visible_participants,
         members=members,
         upcoming_dates=upcoming_dates,
         selected_name=selected_name
