@@ -16,7 +16,7 @@
             <select name="name" id="name-select">
                 <option value="">--選択--</option>
                 {% for member in members %}
-                    <option value="{{ member }}">{{ member }}</option>
+                    <option value="{{ member }}" {% if member == selected_name %}selected{% endif %}>{{ member }}</option>
                 {% endfor %}
             </select>
         </label>
@@ -45,31 +45,5 @@
             {% endfor %}
         </ul>
     {% endfor %}
-
-    <!-- 名前をローカルストレージで保存して復元 -->
-    <script>
-        const nameSelect = document.querySelector('select[name="name"]');
-
-        window.addEventListener('DOMContentLoaded', () => {
-            const savedName = localStorage.getItem('savedName');
-            if (savedName && nameSelect) {
-                for (let option of nameSelect.options) {
-                    if (option.value === savedName) {
-                        option.selected = true;
-                        break;
-                    }
-                }
-            }
-        });
-
-        nameSelect.addEventListener('change', () => {
-            const selectedName = nameSelect.value;
-            if (selectedName) {
-                localStorage.setItem('savedName', selectedName);
-            } else {
-                localStorage.removeItem('savedName');
-            }
-        });
-    </script>
 </body>
 </html>
